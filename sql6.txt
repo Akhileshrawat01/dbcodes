@@ -1,0 +1,78 @@
+NAME: AKHILESH RAWAT
+ROLL NO: 7307
+
+Write a PL/SQL block of code using parameterized Cursor that will merge the data available in the newly created table N_RollCall with the data available in the table O_RollCall. If the data in the first table already exist in the second table then that data should be skipped.
+
+mysql> create table old_roll(roll int,name varchar(10));
+Query OK, 0 rows affected (0.22 sec)
+
+mysql> create table new_roll(roll int,name varchar(10));
+Query OK, 0 rows affected (0.27 sec)
+
+mysql> insert into old_roll values(8,'asd'),(6,'bcd'),(2,'cdn'),(5,'sch');
+Query OK, 4 rows affected (0.03 sec)
+Records: 4  Duplicates: 0  Warnings: 0
+
+mysql> insert into new_roll values(4,'e'),(5,'sch'),(2,'cdn');
+Query OK, 3 rows affected (0.03 sec)
+Records: 3  Duplicates: 0  Warnings: 0
+
+mysql> select * from old_roll;
++------+------+
+| roll | name |
++------+------+
+|    8 | asd  |
+|    6 | bcd  |
+|    2 | cdn  |
+|    5 | sch  |
++------+------+
+4 rows in set (0.00 sec)
+
+mysql> select * from new_roll;
++------+------+
+| roll | name |
++------+------+
+|    4 | e    |
+|    5 | sch  |
+|    2 | cdn  |
++------+------+
+3 rows in set (0.00 sec)
+
+mysql> delimiter //
+mysql>  create procedure upse()
+    -> begin
+    -> declare num int;
+    -> declare flag int default 0;
+    -> declare cur cursor for select roll from old_roll;
+    -> declare continue handler for not found set flag=1;
+    -> open cur;
+    -> iterator:loop
+    -> if flag=1 then leave iterator;
+    -> end if;
+    -> fetch cur into num;
+    -> if not exists(select roll,name from new_roll where roll=num) then 
+insert into new_roll select roll,name from old_roll where roll=num;
+    -> end if;
+    -> end loop iterator;
+    -> close cur;
+    -> end //
+Query OK, 0 rows affected (0.05 sec)
+
+mysql> delimiter ;
+mysql> call roster;
+ERROR 1325 (24000): Cursor is already open
+mysql> call roster();
+ERROR 1325 (24000): Cursor is already open
+mysql> select * from new_roll;
++------+------+
+| roll | name |
++------+------+
+|    4 | e    |
+|    5 | sch  |
+|    2 | cdn  |
+|    8 | asd  |
+|    6 | bcd  |
++------+------+
+5 rows in set (0.00 sec)
+
+mysql> notee
